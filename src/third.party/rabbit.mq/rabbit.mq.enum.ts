@@ -1,0 +1,4 @@
+export enum RabbitMqQueueEnum {
+  REQUEST = 'CRONEST_REQUEST_QUEUE',
+  CALLBACK = 'CRONEST_CALLBACK_QUEUE',
+}
