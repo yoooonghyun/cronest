@@ -1,22 +1,26 @@
-import { Message } from 'protobufjs';
-import { GrpcDecorator } from 'src/third.party/grpc/grpc.decorator';
+import { Field, Int } from '@nestjs/graphql';
+import { IsDate, IsNumber } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('job_callback')
-export class JobCallback extends Message {
-  @GrpcDecorator.field('int32')
+export class JobCallback {
+  @IsNumber()
+  @Field(() => Int)
   @PrimaryGeneratedColumn()
   public readonly id: number;
 
-  @GrpcDecorator.field('string')
+  @IsDate()
+  @Field(() => Date)
   @Column()
   public readonly createdAt: Date;
 
-  @GrpcDecorator.field('string')
+  @IsDate()
+  @Field(() => Date)
   @Column()
   public readonly timestamp: Date;
 
-  @GrpcDecorator.field('int32')
+  @IsNumber()
+  @Field(() => Int)
   @Column()
   public readonly scheduleId: number;
 }

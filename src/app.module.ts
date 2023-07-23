@@ -9,10 +9,11 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConsumerModule } from './consumer/consumer.module';
 import { EventHandlerModule } from './event.handler/event.handler.module';
 import { ResolverModule } from './resolver/resolver.module';
+import { validateConfig } from './utils/config/config.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateConfig }),
     TypeOrmModule.forRootAsync({
       useFactory: async () =>
         Object.assign(await getConnectionOptions(), {

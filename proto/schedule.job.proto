@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package schedule_job;
+
+service ScheduleJobService {
+    rpc create (CreateScheduleJobMessage) returns (ScheduleJobResponse) {}
+    rpc updateRunningState (UpdateScheduleJobRunningStateMessage) returns (ScheduleJobResponse) {}
+    rpc readOne (ScheduleJobIdMessage) returns (ScheduleJobResponse) {}
+}
+
+message CreateScheduleJobMessage {
+    string callbackCannel = 1;
+    string callbackPath = 2;
+    string cronSchedule = 3;
+    string domain = 4;
+    string key = 5;
+    string runningState = 6;
+}
+
+message UpdateScheduleJobRunningStateMessage {
+    int32 id = 1;
+    string runningState = 2;
+}
+
+message ReadScheduleJobMessage {
+    int32 id = 1;
+    string createdAt = 2;
+    string callbackCannel = 3;
+    string callbackPath = 4;
+    string cronSchedule = 5;
+    string domain = 6;
+    string key = 7;
+    string runningState = 8;
+}
+
+message ScheduleJobIdMessage {
+    int32 id = 1;
+}
+
+message ScheduleJobResponse {
+  string result = 1;
+  string message = 2;
+  ReadScheduleJobMessage payload = 3;
+}

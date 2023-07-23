@@ -6,31 +6,35 @@ import express, { Express, Request, Response } from "express";
 const run = async (): Promise<void> => {
   config();
 
-  const port: number = 3002;
-  const serverUrl = "http://localhost:3001";
+  const serverUrl = process.env.SERVER_URL;
+  const clientUrl = process.env.CLIENT_URL;
+  const clientPort = process.env.CLIENT_PORT;
 
-  console.log(serverUrl)
+  if (!serverUrl || !clientUrl || !clientPort) throw new Error("Please check environments!");
+
+  const callbackUri = "/schedule/callback";
+
   const expressInst: Express = express();
   const axiosInst: Axios = axios.create({ baseURL: serverUrl });
 
   expressInst.use(bodyParser.urlencoded({ extended: false }));
   expressInst.use(bodyParser.json());
 
-  expressInst.post('/schedule/callback', (req: Request, res: Response) => {
-    console.log(`Schedule callback w/: ${JSON.stringify(req.body, null, 4)}`)
+  expressInst.post(callbackUri, (req: Request, res: Response) => {
+    console.log(`Schedule callback w/: ${JSON.stringify(req.body, null, 4)}`);
 
     res.send(null);
   });
 
-  expressInst.listen(port, () => {
-    console.log(`[server]: Server is running at <https://localhost>:${port}`);
+  expressInst.listen(clientPort, () => {
+    console.log(`[REST Client]: App is running on port: ${clientPort}`);
   });
 
   axiosInst.post("/scheduleJob", {
     callbackCannel: "REST",
-    callbackPath: "http://localhost:3002/schedule/callback",
+    callbackPath: `${clientUrl}${callbackUri}`,
     cronSchedule: "* * * * * *",
-    domain: "TEST",
+    domain: "REST_TEST",
     key: "CALLBACK_TEST",
     runningState: "ON"
   })

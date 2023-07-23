@@ -1,29 +1,47 @@
+import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from 'src/app.module';
 import { Transport } from '@nestjs/microservices';
-import { RabbitMqQueueEnum } from './third.party/rabbit.mq/rabbit.mq.enum';
+import { AppModule } from 'src/app.module';
+import { RabbitMqQueueEnum } from 'src/third.party/rabbit.mq/rabbit.mq.enum';
+import { ConfigService } from '@nestjs/config';
+import * as R from 'ramda';
 
 const port = process.env.PORT || 3001;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.connectMicroservice({
-    transport: Transport.RMQ,
-    options: {
-      urls: [`amqp://user:password@localhost:5672`],
-      queue: RabbitMqQueueEnum.REQUEST,
-      queueOptions: { durable: false },
-    },
-  });
+  const configService = app.get(ConfigService);
 
-  // app.connectMicroservice({
-  //   transport: Transport.GRPC,
-  //   options: {
-  //     package: 'cronest',
-  //     protoPath: join(__dirname, 'third.party/grpc/cronest.proto'),
-  //   },
-  // });
+  const rabbitMqUrl = configService.get('RABBIT_MQ_URL');
+
+  if (R.isNotNil(rabbitMqUrl)) {
+    app.connectMicroservice({
+      transport: Transport.RMQ,
+      options: {
+        urls: [rabbitMqUrl],
+        queue: RabbitMqQueueEnum.REQUEST,
+        queueOptions: { durable: false },
+      },
+    });
+  }
+
+  const grpcUrl = configService.get('GRPC_ADDRESS');
+
+  if (grpcUrl) {
+    const rootDir = configService.get('ROOT_DIR');
+
+    const protoPath = join(rootDir, 'proto/schedule.job.proto');
+
+    app.connectMicroservice({
+      transport: Transport.GRPC,
+      options: {
+        url: grpcUrl,
+        package: 'schedule_job',
+        protoPath,
+      },
+    });
+  }
 
   app.useGlobalPipes(new ValidationPipe());
 

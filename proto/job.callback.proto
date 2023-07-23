@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package job_callback;
+
+import "schedule.job.proto";
+
+service JobCallbackService {
+    rpc sendCallback (ReadScheduleJobMessage) returns (Empty) {}
+}
+
+message Empty {}

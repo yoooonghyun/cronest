@@ -1,53 +1,58 @@
-import { Connection, ConsumeMessage, connect } from "amqplib"
-import { config } from "dotenv";
+import { Connection, ConsumeMessage, connect } from 'amqplib'
+import { config } from 'dotenv';
+
+type AmqpPayload = {
+  readonly pattern: string;
+  readonly data: object;
+}
 
 const run = async () => {
   config();
 
-  const _errorHandler = (err) => {
-    channel = null;
-    if (RECONNECT) {
-      setTimeout(() => {
-        // this._connect();
-      }, RECONNECT_INTERVAL);
-    } else {
-      // this.failureCb();
-      // this.close().catch((e: Error) => {
-      // });
+  const requestQueue = 'CRONEST_REQUEST_QUEUE';
+  const callbackQueue = 'CRONEST_CALLBACK_QUEUE';
+  const callbackPath = 'testScheduleCallback';
+  const rabbitMqUrl = process.env.RABBIT_MQ_URL;
+
+  if (!rabbitMqUrl) throw new Error("Please check environments!");
+
+  const connection: Connection = await connect(rabbitMqUrl);
+
+  connection.on('error', (err) => {
+    console.error(err);
+  });
+  connection.on('close', () => {
+    console.error('Connection is closed');
+  });
+  let channel = await connection.createChannel();
+
+  channel.assertQueue(requestQueue, {
+    durable: false
+  });
+
+  channel.assertQueue(callbackQueue, {
+    durable: false
+  });
+
+  channel.consume(callbackQueue, (msg: ConsumeMessage) => {
+    const payload: AmqpPayload = JSON.parse(msg.content.toString())
+
+    if (payload.pattern === callbackPath) {
+      console.log(payload.data)
     }
-  }
 
-  const RECONNECT = true;
-  const RECONNECT_INTERVAL = 1000;
-  const connection: Connection = await connect('amqp://user:password@localhost:5672');
-
-
-  connection.on('error', _errorHandler);
-  connection.on('close', _errorHandler);
-  let channel = await connection.createChannel()
-
-  channel.assertQueue("CRONEST_REQUEST_QUEUE", {
-    durable: false
+    channel.ack(msg);
   });
 
-  channel.assertQueue("CRONEST_CALLBACK_QUEUE", {
-    durable: false
-  });
-
-
-  channel.consume("CRONEST_CALLBACK_QUEUE", (msg: ConsumeMessage) => {
-    console.log(msg);
-  });
-
-  channel.sendToQueue("CRONEST_REQUEST_QUEUE", Buffer.from(JSON.stringify({
+  channel.sendToQueue(requestQueue, Buffer.from(JSON.stringify({
     pattern: 'createScheduleJob',
     data: {
-      callbackCannel: "RABBIT_MQ",
-      callbackPath: "testScheduleCallback",
-      cronSchedule: "* * * * * *",
-      domain: "RABBIT_TEST",
-      key: "CALLBACK_TEST",
-      runningState: "ON"
+      callbackCannel: 'RABBIT_MQ',
+      callbackPath: callbackPath,
+      cronSchedule: '* * * * * *',
+      domain: 'RABBIT_TEST',
+      key: 'CALLBACK_TEST',
+      runningState: 'ON'
     },
   })));
 }

@@ -4,6 +4,7 @@ import * as R from 'ramda';
 import { ChannelEnum } from 'src/enum/channel.enum';
 import { RabbitMqPublisherDelegate } from 'src/publisher/rabbit.mq/rabbit.mq.publisher.delegate';
 import { RestPublisherDelegate } from 'src/publisher/rest/rest.publisher.delegate';
+import { GrpcPublisherDelegate } from './grpc/grpc.publisher.delegate';
 
 @Injectable()
 export class Publisher {
@@ -12,6 +13,7 @@ export class Publisher {
   constructor(
     private readonly rest: RestPublisherDelegate,
     private readonly rabbitMq: RabbitMqPublisherDelegate,
+    private readonly grpc: GrpcPublisherDelegate,
   ) {
     this.logger = new Logger(Publisher.name);
   }
@@ -32,6 +34,8 @@ export class Publisher {
             return this.rabbitMq;
           case ChannelEnum.REST:
             return this.rest;
+          case ChannelEnum.GRPC:
+            return this.grpc;
           default:
             throw new HttpException('Failed to find publisher.', HttpStatus.INTERNAL_SERVER_ERROR);
         }
