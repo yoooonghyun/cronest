@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2022 Medir Inc.
- * Created on Fri Apr 22 2022
- */
-
 import { Logger } from '@nestjs/common';
 
 /**
@@ -13,27 +8,11 @@ import { Logger } from '@nestjs/common';
 export class CommonLogger extends Logger {
   /**
    * @method @public
-   * @description Erorr 출력.
-   * @deprecated printErr로 대체.
-   * @param {string} message - 출력 메세지.
-   * @param {Error} err - Error 객체.
-   * @param {any} params - 추가 파라미터.
-   */
-  public printError(message: string, err: Error, ...params: any) {
-    super.error(
-      `${message}${params.length ? `\nparameters:${JSON.stringify(params, null, 4)}` : ''}
-${err.message}
-${err.stack}`,
-    );
-  }
-
-  /**
-   * @method @public
-   * @description Erorr 출력.
-   * @param {string} callerName - 호출 함수.
-   * @param {string} message - 출력 메세지.
-   * @param {Error} err - Error 객체.
-   * @param {any} params - 추가 파라미터.
+   * @description Print error log.
+   * @param {string} callerName - Name of caller class.
+   * @param {string} message - Message to print.
+   * @param {Error} err - Thrown error object.
+   * @param {any} params - Additional parameters.
    */
   public printErr(callerName: string, message: string, err: Error, ...params: any) {
     super.error(
@@ -47,11 +26,11 @@ ${err.stack}`,
 
   /**
    * @method @public
-   * @description I/O 발생 시점에 로그 출력.
-   * @param {string} ioType - I/O 타입.
-   * @param {string} callerName - 호출 함수.
-   * @param {string} message - 출력 메세지.
-   * @param {any} params - 추가 파라미터.
+   * @description Print infomation log.
+   * @param {string} ioType - Typeof I/O.
+   * @param {string} callerName - Name of caller class.
+   * @param {string} message - Message to print.
+   * @param {any} params - Additional parameters.
    */
   public printLog(ioType: string, callerName: string, message: string, ...params: any) {
     super.log(

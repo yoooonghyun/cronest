@@ -6,10 +6,21 @@ import { RabbitMqPublisherDelegate } from 'src/publisher/rabbit.mq/rabbit.mq.pub
 import { RestPublisherDelegate } from 'src/publisher/rest/rest.publisher.delegate';
 import { GrpcPublisherDelegate } from './grpc/grpc.publisher.delegate';
 
+/**
+ * @class
+ * @description Publisher class for sending job/callback to client.
+ */
 @Injectable()
 export class Publisher {
   private readonly logger: Logger;
 
+  /**
+   * @constructor
+   * @description Constructor of Publisher class.
+   * @param rest Delegate of REST channel.
+   * @param rabbitMq Delegate of RabbitMQ channel.
+   * @param grpc Delegate of GRPC channel.
+   */
   constructor(
     private readonly rest: RestPublisherDelegate,
     private readonly rabbitMq: RabbitMqPublisherDelegate,
